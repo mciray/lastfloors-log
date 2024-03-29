@@ -15,11 +15,11 @@ class LogEntryListView(generics.ListAPIView):
 class LogEntryCreateView(generics.CreateAPIView):
     queryset = LogEntry.objects.all()
     serializer_class = LogEntrySerializer
-    def post(self, request, *args, **kwargs):
-        secure_key = request.headers.get('X-Custom-Secure-Key')
-        if secure_key != POST_SECRET:
-            return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
-        return super().post(request, *args, **kwargs)
+    # def post(self, request, *args, **kwargs):
+    #     secure_key = request.headers.get('X-Custom-Secure-Key')
+    #     if secure_key != POST_SECRET:
+    #         return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+    #     return super().post(request, *args, **kwargs)
 
 
 def user_login(request):
