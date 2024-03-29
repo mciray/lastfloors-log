@@ -1,8 +1,6 @@
-echo "Pip Güncelleniyor..."
-pip install --upgrade pip
-
-echo "Requirements kuruluyor..."
+set -o errexit
 
 pip install -r requirements.txt
 
-echo "Tamamlandı"
+python manage.py collectstatic --no-input
+python manage.py migrate
