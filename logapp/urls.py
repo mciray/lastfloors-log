@@ -1,12 +1,11 @@
 from django.urls import path
-from .views import LogEntryListView, LogEntryCreateView,index
+from .views import LogEntryListView, LogEntryCreateView, user_login,index
 
-app_name='log/'
 
 urlpatterns = [
-    path("", index, name="home"),
+    path('login', user_login, name='login'),
+    path('',index, name='home'),
     path('list/', LogEntryListView.as_view(), name='log-entry-list'),
     path('create/', LogEntryCreateView.as_view(), name='log-entry-create'),
 
-    
 ]

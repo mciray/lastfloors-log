@@ -8,11 +8,11 @@
 </head>
 <body>
     <style>
-.log-cards-container {
-    max-height: 400px; /* İhtiyacınıza göre ayarlayın */
-    overflow-y: auto; /* İçerik yüksekliği max-height'i aştığında scrollbar göster */
-    overflow-x: hidden; /* Yatay scrollbar'ı gizle */
-}
+    .log-cards-container{
+        max-height: 400px; 
+        overflow-y: auto; 
+        overflow-x: hidden;
+    }
     </style>
 <div class="container">
     <div class="row mt-5">
@@ -33,13 +33,14 @@
         logInfoDiv.innerHTML = ''; // Önceki kartları temizle
         logs.forEach(log => {
             const cardHtml = document.createElement('div');
-            cardHtml.className = `card mb-3 ${getStatusColor(log.status_code)}`; // Renk sınıfı dinamik olarak eklenecek
+            cardHtml.className = `card mb-3 shadow-sm ${getStatusColor(log.status_code)}`; // Gölgelendirme efekti eklenmiş
             cardHtml.innerHTML = `
-                <div class="card-body">
+                <div class="card-header">${log.method}</div> <!-- Method bilgisini başlığa taşıyın -->
+                <div class="card-body bg-light"> <!-- Kart arka planını daha açık renk yapın -->
                     <h5 class="card-title">Path: ${log.path}</h5>
-                    <h6 class="card-subtitle mb-2">Method: ${log.method}</h6>
                     <p class="card-text">User: ${log.user}</p>
                     <p class="card-text">Status Code: ${log.status_code}</p>
+                    <a href="#" class="btn btn-primary">Detaylar</a> <!-- İsteğe bağlı olarak eylem butonu -->
                 </div>
             `;
             logCardsContainer.appendChild(cardHtml);
@@ -75,19 +76,32 @@
                     logChart.destroy();
                 }
                 logChart = new Chart(ctx, {
-                    type: 'line',
+                    type: 'line', // veya isteğe bağlı olarak 'bar'
                     data: {
                         labels: paths,
                         datasets: [{
                             label: 'Status Codes',
                             data: statusCodes,
-                            fill: false,
+                            fill: true,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Daha yumuşak bir arka plan rengi
                             borderColor: 'rgb(75, 192, 192)',
-                            tension: 0.1
+                            borderWidth: 2,
+                            tension: 0.4 // Daha yumuşak bir çizgi
                         }]
                     },
                     options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true // Y ekseni sıfırdan başlasın
+                            }
+                        },
                         plugins: {
+                            legend: {
+                                display: true, // Efsaneyi göster
+                                labels: {
+                                    color: 'rgb(255, 99, 132)' // Efsane metni rengi
+                                }
+                            },
                             tooltip: {
                                 callbacks: {
                                     afterBody: function(context) {

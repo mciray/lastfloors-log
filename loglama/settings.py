@@ -97,6 +97,8 @@ DATABASES = {
         'PORT': 5432,  
     }
 }
+POST_SECRET=os.getenv('POST_SECRET')
+GET_SECRET=os.getenv('GET_SECRET')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
