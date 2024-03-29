@@ -62,7 +62,7 @@
     let logChart;
 
     const fetchDataAndUpdateChart = () => {
-        fetch('http://127.0.0.1:8001/log/list/')
+        fetch('https://lastfloors-log.onrender.com/log/list/')
             .then(response => response.json())
             .then(data => {
                 console.log(data);
