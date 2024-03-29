@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'loglama.wsgi.application'
+WSGI_APPLICATION = 'loglama.wsgi.app'
 
 
 # Database
