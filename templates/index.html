@@ -64,7 +64,7 @@
     };
 
     const fetchDataAndUpdateChart = () => {
-        fetch('https://lastfloors-log.onrender.com/log/list/')
+        fetch('http://127.0.0.1:8000/log/list/')
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -72,13 +72,16 @@
                 const statusCodes = data.map(log => log.status_code);
                 const createdAtdates = data.map(log => new Date(log.created_at).toLocaleString());
                 const colors = statusCodes.map(code => getStatusColor(code));
+                
+                
 
                 updateLogInfo(data, createdAtdates);
 
                 if (logChart) {
                     logChart.destroy();
                 }
-
+                
+                
                 const ctx = document.getElementById('logChart').getContext('2d');
                 logChart = new Chart(ctx, {
                     type: 'line',
@@ -88,7 +91,7 @@
                             label: 'Status Codes',
                             data: statusCodes,
                             fill: false,
-                            borderColor: 'rgb(75, 192, 192)',
+                            borderColor: colors, // Renklerin atanması
                             borderWidth: 4,
                             tension: 0.4,
                             pointBackgroundColor: colors,

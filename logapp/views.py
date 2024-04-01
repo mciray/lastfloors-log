@@ -11,7 +11,9 @@ from loglama.settings import POST_SECRET
 class LogEntryListView(generics.ListAPIView):
     serializer_class = LogEntrySerializer
     def get_queryset(self):
-        return LogEntry.objects.order_by('created_at').reverse()[:50]
+        queryset = LogEntry.objects.order_by('created_at')
+        last_entry = queryset.last()
+        return queryset.exclude(pk=last_entry.pk)[:49] | queryset.filter(pk=last_entry.pk)
 
 class LogEntryCreateView(generics.CreateAPIView):
     queryset = LogEntry.objects.all()
