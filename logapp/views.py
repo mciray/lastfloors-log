@@ -9,28 +9,32 @@ from rest_framework import status
 from rest_framework.response import Response
 from loglama.settings import POST_SECRET
 from django.db.models import Q
+
 class LogEntryListView(generics.ListAPIView):
     serializer_class = LogEntrySerializer
     def get_queryset(self):
-        queryset = LogEntry.objects.order_by('created_at')
-        
-        
+        queryset = LogEntry.objects.all()
+
         # Filtreleme seçeneklerini al
         path = self.request.query_params.get('path', None)
         method = self.request.query_params.get('method', None)
         status_code = self.request.query_params.get('status_code', None)
 
-        # Filtreleme seçeneklerine göre queryset'i filtrele
-        if path:
-            queryset = queryset.filter(path__icontains=path)
-        if method:
-            queryset = queryset.filter(method__icontains=method)
-        if status_code:
-            queryset = queryset.filter(status_code=status_code)
+        # Eğer en az bir filtreleme seçeneği belirtilmişse, bütün modelde arama yap
+        if path or method or status_code:
+            filter_conditions = Q()
+            if path:
+                filter_conditions &= Q(path__icontains=path)
+            if method:
+                filter_conditions &= Q(method__icontains=method)
+            if status_code:
+                filter_conditions &= Q(status_code=status_code)
+            queryset = queryset.filter(filter_conditions)
+        else:
+            last_entries = list(reversed(queryset.order_by('-created_at')[:50]))
+            return last_entries
 
-        last_entry = queryset.last()
-        return queryset.exclude(pk=last_entry.pk)[:49] | queryset.filter(pk=last_entry.pk)
-
+        return queryset
 class LogEntryCreateView(generics.CreateAPIView):
     queryset = LogEntry.objects.all()
     serializer_class = LogEntrySerializer
