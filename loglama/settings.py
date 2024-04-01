@@ -28,8 +28,9 @@ SECRET_KEY = 'django-insecure-ss3ywaqtzt*(ukzlsy4zdo3d_i51=s4*zz%lq@^k*=txm%rh2v
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CORS_ALLOW_ALL_ORIGINS = True
-
+CORS_ALLOWED_ORIGINS = [
+    "https://lastfloors-ana-admin-development.netlify.app",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -98,7 +99,7 @@ DATABASES = {
     }
 }
 POST_SECRET=os.getenv('POST_SECRET')
-GET_SECRET=os.getenv('GET_SECRET')
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
