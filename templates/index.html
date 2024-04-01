@@ -8,118 +8,119 @@
 </head>
 <body>
     <style>
-    .log-cards-container{
+    .log-cards-container {
         max-height: 600px; 
         overflow-y: auto; 
         overflow-x: hidden;
     }
     </style>
-<div class="container">
-    <div class="row mt-5">
-        <div class="col">
-            <canvas id="logChart"  height="300"></canvas>
-        </div>
-        <div class="col"  id="logInfo">
-            <div id="logCardsContainer" class="log-cards-container">
-                <!-- Kartlar buraya dinamik olarak eklenecek -->
+<div class="container mt-5 mb-5">
+    <section>
+        <h1 class="text-center">Log Entries Chart</h1>
+        <div class="row">
+            <div class="col">
+                <canvas id="logChart" height="200"></canvas>
             </div>
         </div>
-    </div>
+    </section>
+    
+    <section>
+        <h2 class="mt-5">Log Information</h2>
+        <div class="row ">
+            <div class="col" id="logInfo">
+                <div id="logCardsContainer" class="log-cards-container">
+                    <!-- Kartlar buraya dinamik olarak eklenecek -->
+                </div>
+            </div>
+            <div class="col-md-5">
+                <h1 class="text-center">Log Status Code's</h1>
+                <canvas id="statusCodePieChart" height="300"></canvas>
+            </div>
+        </div>
+    </section>
 </div>
 
 <script>
-    const updateLogInfo = (logs) => {
+    const updateLogInfo = (logs, createdAtdates) => {
         const logInfoDiv = document.getElementById('logCardsContainer');
-        logInfoDiv.innerHTML = ''; // Önceki kartları temizle
-        logs.forEach(log => {
+        logInfoDiv.innerHTML = '';
+        logs.forEach((log, index) => {
             const cardHtml = document.createElement('div');
-            cardHtml.className = `card mb-3 shadow-sm ${getStatusColor(log.status_code)}`; // Gölgelendirme efekti eklenmiş
+            cardHtml.className = `card mb-3 shadow-sm ${getStatusColor(log.status_code)}`;
             cardHtml.innerHTML = `
                 <div class="card-header ${getMethodColor(log.method)}">${log.method}</div>
                 <div class="card-body">
                     <h5 class="card-title">Path: ${log.path}</h5>
                     <p class="card-text">User: ${log.user}</p>
                     <p class="card-text">Status Code: ${log.status_code}</p>
-                
+                    <p class="card-text">Created At: ${createdAtdates[index]}</p>
                 </div>
             `;
-            logCardsContainer.appendChild(cardHtml);
+            logInfoDiv.appendChild(cardHtml);
         });
-
-        function getStatusColor(statusCode) {
-            if (statusCode >= 200 && statusCode < 300) {
-                return 'text-success';
-            } else if (statusCode >= 400 && statusCode < 500) {
-                return 'text-danger';
-            } else if (statusCode >= 500) {
-                return 'text-dark';
-            } else {
-                return 'text-secondary';
-            }
-        }
-        function getMethodColor(method) {
-            switch(method.toUpperCase()) {
-                case 'GET':
-                    return 'text-white bg-success';
-                case 'POST':
-                    return 'text-white bg-primary';
-                case 'PUT':
-                    return 'text-white bg-warning';
-                case 'DELETE':
-                    return 'text-white bg-danger';
-                default:
-                    return 'text-white bg-secondary';
-            }
-        }
-        };
-    const ctx = document.getElementById('logChart').getContext('2d');
-    let logChart;
+    };
 
     const fetchDataAndUpdateChart = () => {
         fetch('https://lastfloors-log.onrender.com/log/list/')
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                // Chart güncelleme
                 const paths = data.map(log => log.path);
-                const methods = data.map(log => log.method); // Yeni
                 const statusCodes = data.map(log => log.status_code);
-                const users = data.map(log => log.user); // Kullanıcı bilgisini al
+                const createdAtdates = data.map(log => new Date(log.created_at).toLocaleString());
+                const colors = statusCodes.map(code => getStatusColor(code));
 
-                if (logChart && typeof logChart.destroy === 'function') {
+                updateLogInfo(data, createdAtdates);
+
+                if (logChart) {
                     logChart.destroy();
                 }
+
+                const ctx = document.getElementById('logChart').getContext('2d');
                 logChart = new Chart(ctx, {
-                    type: 'line', // veya isteğe bağlı olarak 'bar'
+                    type: 'line',
                     data: {
                         labels: paths,
                         datasets: [{
                             label: 'Status Codes',
                             data: statusCodes,
-                            fill: true,
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Daha yumuşak bir arka plan rengi
+                            fill: false,
                             borderColor: 'rgb(75, 192, 192)',
-                            borderWidth: 2,
-                            tension: 0.4 // Daha yumuşak bir çizgi
+                            borderWidth: 4,
+                            tension: 0.4,
+                            pointBackgroundColor: colors,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: colors,
+                            pointRadius: 8
                         }]
                     },
                     options: {
                         scales: {
                             y: {
-                                beginAtZero: true // Y ekseni sıfırdan başlasın
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(171,171,171,0.1)',
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false,
+                                }
                             }
                         },
                         plugins: {
                             legend: {
-                                display: true, // Efsaneyi göster
+                                display: true,
                                 labels: {
-                                    color: 'rgb(255, 99, 132)' // Efsane metni rengi
+                                    color: 'rgb(255, 99, 132)'
                                 }
                             },
                             tooltip: {
                                 callbacks: {
                                     afterBody: function(context) {
-                                        return 'User: ' + users[context.dataIndex] + '\nMethod: ' + methods[context.dataIndex];
+                                        const index = context[0].dataIndex;
+                                        return 'User: ' + data[index].user + '\nMethod: ' + data[index].method + '\nCreated At: ' + createdAtdates[index];
                                     }
                                 }
                             }
@@ -127,13 +128,81 @@
                     }
                 });
 
-                // Log bilgilerini kartlarda güncelle
-                updateLogInfo(data);
+                // Pie Chart için status code'ları çizdirme
+                drawStatusCodePieChart(statusCodes);
             });
     };
 
+    const drawStatusCodePieChart = (statusCodes) => {
+        // Status kodlarına göre gruplama yapma
+        const statusCodeCounts = statusCodes.reduce((acc, code) => {
+            acc[code] = (acc[code] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Chart.js için gerekli veri ve arka plan renklerini hazırlama
+        const data = {
+            labels: Object.keys(statusCodeCounts),
+            datasets: [{
+                label: 'Status Code Distribution',
+                data: Object.values(statusCodeCounts),
+                backgroundColor: Object.keys(statusCodeCounts).map(code => getStatusColor(code)),
+                hoverOffset: 4
+            }]
+        };
+
+        const ctx = document.getElementById('statusCodePieChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Status Code Distribution'
+                    }
+                }
+            }
+        });
+    };
+
+    const getStatusColor = (statusCode) => {
+        if (statusCode >= 200 && statusCode < 300) {
+            return 'rgba(75, 192, 192, 1)'; // Yeşil
+        } else if (statusCode >= 300 && statusCode < 400) {
+            return 'rgba(255, 206, 86, 1)'; // Sarı
+        } else if (statusCode >= 400 && statusCode < 500) {
+            return 'rgba(255, 99, 132, 1)'; // Kırmızı
+        } else if (statusCode >= 500) {
+            return 'rgba(153, 102, 255, 1)'; // Mor
+        } else {
+            return 'rgba(169, 169, 169, 1)'; // Gri
+        }
+    };
+
+    const getMethodColor = (method) => {
+        switch(method.toUpperCase()) {
+            case 'GET':
+                return 'text-white bg-success';
+            case 'POST':
+                return 'text-white bg-primary';
+            case 'PUT':
+                return 'text-white bg-warning';
+            case 'DELETE':
+                return 'text-white bg-danger';
+            default:
+                return 'text-white bg-secondary';
+        }
+    };
+
+    let logChart;
+
     fetchDataAndUpdateChart();
-    setInterval(fetchDataAndUpdateChart, 3000);
+    setInterval(fetchDataAndUpdateChart, 10000); // 10 saniyede bir güncelle
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

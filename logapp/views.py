@@ -9,8 +9,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from loglama.settings import POST_SECRET
 class LogEntryListView(generics.ListAPIView):
-    queryset = LogEntry.objects.all()
     serializer_class = LogEntrySerializer
+    def get_queryset(self):
+        return LogEntry.objects.order_by('-created_at')[:50]
 
 class LogEntryCreateView(generics.CreateAPIView):
     queryset = LogEntry.objects.all()

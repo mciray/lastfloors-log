@@ -27,11 +27,11 @@ SECRET_KEY = 'django-insecure-ss3ywaqtzt*(ukzlsy4zdo3d_i51=s4*zz%lq@^k*=txm%rh2v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['lastfloors-log.onrender.com',]
+ALLOWED_HOSTS = ['lastfloors-log.onrender.com','127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
     "https://lastfloors-ana-admin-development.netlify.app",
     "https://lastfloors-log.onrender.com",
-    "http://127.0.0.1:8000",
+    "http://127.0.0.1",
     "https://api-v2-staging.lastfloors.com",
 ]
 # Application definition
