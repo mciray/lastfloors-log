@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.response import Response
-from loglama.settings import POST_SECRET,GET_SECRET
+from loglama.settings import POST_SECRET
 class LogEntryListView(generics.ListAPIView):
     queryset = LogEntry.objects.all()
     serializer_class = LogEntrySerializer
