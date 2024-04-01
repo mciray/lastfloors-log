@@ -6,65 +6,79 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <style>
-    .log-cards-container {
-        max-height: 600px; 
-        overflow-y: auto; 
-        overflow-x: hidden;
-    }
-    </style>
-<div class="container mt-5 mb-5">
-    <section>
-        <h1 class="text-center">Log Entries Chart</h1>
-        <div class="row">
-            <div class="col">
-                <canvas id="logChart" height="200"></canvas>
-            </div>
-        </div>
-    </section>
-    
-    <section>
-        <h2 class="mt-5">Log Information</h2>
-        <div class="row ">
-            <div class="col" id="logInfo">
-                <div id="logCardsContainer" class="log-cards-container">
-                    <!-- Kartlar buraya dinamik olarak eklenecek -->
+<body class="bg-dark text-light">
+    <div class="container mt-5 mb-5">
+        <section>
+            <h1 class="text-center mb-4">Log Entries Chart</h1>
+            <div class="row">
+                <div class="col">
+                    <canvas id="logChart" height="200"></canvas>
                 </div>
             </div>
-            <div class="col-md-5">
-                <h1 class="text-center">Log Status Code's</h1>
-                <canvas id="statusCodePieChart" height="300"></canvas>
-            </div>
-        </div>
-    </section>
-</div>
+        </section>
+        
+        <section>
+            <h2 class="mt-5">Log Information</h2>
+            <div class="row mb-3 justify-content-center">
 
-<script>
+                <div class="col">
+                    <h1 class="text-center">Log Status Code's</h1>
+                    <canvas id="statusCodePieChart" height="300"></canvas>
+                </div>
+
+                <div class="col m-auto">
+                    <form id="filterForm">
+                        <div class="mb-3">
+                            <label for="pathInput" class="form-label">Path:</label>
+                            <input type="text" class="form-control" id="pathInput" name="path" placeholder="Enter path">
+                        </div>
+                        <div class="mb-3">
+                            <label for="methodInput" class="form-label">Method:</label>
+                            <input type="text" class="form-control" id="methodInput" name="method" placeholder="Enter method">
+                        </div>
+                        <div class="mb-3">
+                            <label for="statusCodeInput" class="form-label">Status Code:</label>
+                            <input type="number" class="form-control" id="statusCodeInput" name="status_code" placeholder="Enter status code">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col" id="logInfo">
+                    <div id="logCardsContainer" class="log-cards-container bg-secondary p-3" style="max-height: 500px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
     let logChart;
     let statusCodePieChart;
+    let intervalID;
 
     const updateLogInfo = (logs, createdAtdates) => {
         const logInfoDiv = document.getElementById('logCardsContainer');
         logInfoDiv.innerHTML = '';
         logs.forEach((log, index) => {
             const cardHtml = document.createElement('div');
-            cardHtml.className = `card mb-3 shadow-sm ${getStatusColor(log.status_code)}`;
+            cardHtml.className = `card mb-3 bg-dark border-light text-light`;
             cardHtml.innerHTML = `
-                <div class="card-header ${getMethodColor(log.method)}">${log.method}</div>
+                <div class="card-header bg-secondary text-light">${log.method}</div>
                 <div class="card-body">
-                    <h5 class="card-title">Path: ${log.path}</h5>
-                    <p class="card-text">User: ${log.user}</p>
-                    <p class="card-text">Status Code: ${log.status_code}</p>
-                    <p class="card-text">Created At: ${createdAtdates[index]}</p>
+                    <h5 class="card-title text-light">Path: ${log.path}</h5>
+                    <p class="card-text text-light">User: ${log.user}</p>
+                    <p class="card-text text-light">Status Code: ${log.status_code}</p>
+                    <p class="card-text text-light">Created At: ${createdAtdates[index]}</p>
                 </div>
             `;
             logInfoDiv.appendChild(cardHtml);
         });
     };
 
-    const fetchDataAndUpdateChart = () => {
-        fetch('https://lastfloors-log.onrender.com/log/list/')
+    const fetchDataAndUpdateChart = (queryParams) => {
+        fetch('https://lastfloors-log.onrender.com/log/list/' + (queryParams ? '?' + queryParams : ''))
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -73,69 +87,73 @@
                 const createdAtdates = data.map(log => new Date(log.created_at).toLocaleString());
                 const colors = statusCodes.map(code => getStatusColor(code));
                 
-                
-
                 updateLogInfo(data, createdAtdates);
 
-                if (logChart) {
-                    logChart.destroy();
-                }
-                
-                
-                const ctx = document.getElementById('logChart').getContext('2d');
-                logChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: paths,
-                        datasets: [{
-                            label: 'Status Codes',
-                            data: statusCodes,
-                            fill: false,
-                            borderColor: colors, // Renklerin atanması
-                            borderWidth: 4,
-                            tension: 0.4,
-                            pointBackgroundColor: colors,
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: colors,
-                            pointRadius: 8
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: 'rgba(171,171,171,0.1)',
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false,
-                                }
-                            }
+                if (!logChart) {
+                    const ctx = document.getElementById('logChart').getContext('2d');
+                    logChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: paths,
+                            datasets: [{
+                                label: 'Status Codes',
+                                data: statusCodes,
+                                fill: false,
+                                borderColor: colors, // Renklerin atanması
+                                borderWidth: 4,
+                                tension: 0.4,
+                                pointBackgroundColor: colors,
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: colors,
+                                pointRadius: 8
+                            }]
                         },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                labels: {
-                                    color: 'rgb(255, 99, 132)'
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(171,171,171,0.1)',
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false,
+                                    }
                                 }
                             },
-                            tooltip: {
-                                callbacks: {
-                                    afterBody: function(context) {
-                                        const index = context[0].dataIndex;
-                                        return 'User: ' + data[index].user + '\nMethod: ' + data[index].method + '\nCreated At: ' + createdAtdates[index];
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {
+                                        color: 'rgb(255, 99, 132)'
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        afterBody: function(context) {
+                                            const index = context[0].dataIndex;
+                                            return 'User: ' + data[index].user + '\nMethod: ' + data[index].method + '\nCreated At: ' + createdAtdates[index];
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                } else {
+                    logChart.data.labels = paths;
+                    logChart.data.datasets[0].data = statusCodes;
+                    logChart.data.datasets[0].borderColor = colors;
+                    logChart.data.datasets[0].pointBackgroundColor = colors;
+                    logChart.update();
+                }
 
                 // Pie Chart için status code'ları çizdirme
                 drawOrUpdateStatusCodePieChart(statusCodes);
+
+                // Filtre uygulanmışsa, interval süresini uzat
+                checkFilterAndSetInterval();
             });
     };
 
@@ -194,25 +212,49 @@
         }
     };
 
-    const getMethodColor = (method) => {
-        switch(method.toUpperCase()) {
-            case 'GET':
-                return 'text-white bg-success';
-            case 'POST':
-                return 'text-white bg-primary';
-            case 'PUT':
-                return 'text-white bg-warning';
-            case 'DELETE':
-                return 'text-white bg-danger';
-            default:
-                return 'text-white bg-secondary';
+    const checkFilterAndSetInterval = () => {
+        const path = document.getElementById('pathInput').value;
+        const method = document.getElementById('methodInput').value;
+        const statusCode = document.getElementById('statusCodeInput').value;
+
+        // Filtre uygulanmışsa, interval süresini uzat
+        if (path || method || statusCode) {
+            clearInterval(intervalID);
+            intervalID = setInterval(() => {
+                const queryParams = new URLSearchParams();
+                if (path) queryParams.append('path', path);
+                if (method) queryParams.append('method', method);
+                if (statusCode) queryParams.append('status_code', statusCode);
+                fetchDataAndUpdateChart(queryParams.toString());
+            }, 20000); // 15 saniyede bir güncelle
         }
     };
 
+    document.getElementById('filterForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const path = document.getElementById('pathInput').value;
+        const method = document.getElementById('methodInput').value;
+        const statusCode = document.getElementById('statusCodeInput').value;
+
+        // Query param'ları oluştur
+        const queryParams = new URLSearchParams();
+        if (path) queryParams.append('path', path);
+        if (method) queryParams.append('method', method);
+        if (statusCode) queryParams.append('status_code', statusCode);
+
+        fetchDataAndUpdateChart(queryParams.toString());
+
+
+        if (!path && !method && !statusCode) {
+            clearInterval(intervalID);
+            intervalID = setInterval(fetchDataAndUpdateChart, 8000); // 8 saniyede bir güncelle
+        }
+    });
+
     fetchDataAndUpdateChart();
-    setInterval(fetchDataAndUpdateChart, 3000); // 10 saniyede bir güncelle
+    intervalID = setInterval(fetchDataAndUpdateChart, 8000); // 8 saniyede bir güncelle
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -8,10 +8,26 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.response import Response
 from loglama.settings import POST_SECRET
+from django.db.models import Q
 class LogEntryListView(generics.ListAPIView):
     serializer_class = LogEntrySerializer
     def get_queryset(self):
         queryset = LogEntry.objects.order_by('created_at')
+        
+        
+        # Filtreleme seçeneklerini al
+        path = self.request.query_params.get('path', None)
+        method = self.request.query_params.get('method', None)
+        status_code = self.request.query_params.get('status_code', None)
+
+        # Filtreleme seçeneklerine göre queryset'i filtrele
+        if path:
+            queryset = queryset.filter(path__icontains=path)
+        if method:
+            queryset = queryset.filter(method__icontains=method)
+        if status_code:
+            queryset = queryset.filter(status_code=status_code)
+
         last_entry = queryset.last()
         return queryset.exclude(pk=last_entry.pk)[:49] | queryset.filter(pk=last_entry.pk)
 
