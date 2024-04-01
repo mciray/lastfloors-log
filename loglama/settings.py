@@ -27,9 +27,12 @@ SECRET_KEY = 'django-insecure-ss3ywaqtzt*(ukzlsy4zdo3d_i51=s4*zz%lq@^k*=txm%rh2v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 CORS_ALLOWED_ORIGINS = [
     "https://lastfloors-ana-admin-development.netlify.app",
+    "https://lastfloors-log.onrender.com",
+    "http://127.0.0.1:8000",
+    "https://api-v2-staging.lastfloors.com",
 ]
 # Application definition
 
@@ -58,7 +61,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'loglama.urls'
-
+LOGIN_URL ='/log/login'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

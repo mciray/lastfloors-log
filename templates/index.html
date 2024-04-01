@@ -35,12 +35,12 @@
             const cardHtml = document.createElement('div');
             cardHtml.className = `card mb-3 shadow-sm ${getStatusColor(log.status_code)}`; // Gölgelendirme efekti eklenmiş
             cardHtml.innerHTML = `
-                <div class="card-header">${log.method}</div> <!-- Method bilgisini başlığa taşıyın -->
-                <div class="card-body bg-light"> <!-- Kart arka planını daha açık renk yapın -->
+                <div class="card-header ${getMethodColor(log.method)}">${log.method}</div>
+                <div class="card-body">
                     <h5 class="card-title">Path: ${log.path}</h5>
                     <p class="card-text">User: ${log.user}</p>
                     <p class="card-text">Status Code: ${log.status_code}</p>
-                    <a href="#" class="btn btn-primary">Detaylar</a> <!-- İsteğe bağlı olarak eylem butonu -->
+                
                 </div>
             `;
             logCardsContainer.appendChild(cardHtml);
@@ -57,12 +57,26 @@
                 return 'text-secondary';
             }
         }
+        function getMethodColor(method) {
+            switch(method.toUpperCase()) {
+                case 'GET':
+                    return 'text-white bg-success';
+                case 'POST':
+                    return 'text-white bg-primary';
+                case 'PUT':
+                    return 'text-white bg-warning';
+                case 'DELETE':
+                    return 'text-white bg-danger';
+                default:
+                    return 'text-white bg-secondary';
+            }
+        }
         };
     const ctx = document.getElementById('logChart').getContext('2d');
     let logChart;
 
     const fetchDataAndUpdateChart = () => {
-        fetch('https://lastfloors-log.onrender.com/log/list/')
+        fetch('http://127.0.0.1:8000/log/list/')
             .then(response => response.json())
             .then(data => {
                 console.log(data);

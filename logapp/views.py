@@ -17,11 +17,9 @@ class LogEntryCreateView(generics.CreateAPIView):
     serializer_class = LogEntrySerializer
     def post(self, request, *args, **kwargs):
         secure_key = request.headers.get('X-Custom-Secure-Key')
-        
         if secure_key != POST_SECRET:
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
         return super().post(request, *args, **kwargs)
-
 
 def user_login(request):
     if request.method == 'POST':
@@ -33,6 +31,7 @@ def user_login(request):
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
+
 @login_required
 def index(request):
     return render(request,'index.html')
