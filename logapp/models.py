@@ -5,6 +5,7 @@ class LogEntry(models.Model):
     method = models.CharField(max_length=10)
     status_code = models.IntegerField()
     user = models.CharField(max_length=255, default='Anonymous')
+    response_time= models.FloatField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

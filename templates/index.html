@@ -70,6 +70,7 @@
                     <h5 class="card-title text-light">Path: ${log.path}</h5>
                     <p class="card-text text-light">User: ${log.user}</p>
                     <p class="card-text text-light">Status Code: ${log.status_code}</p>
+                    <p class="card-text text-light">Response Time: ${log.response_time}ms</p>
                     <p class="card-text text-light">Created At: ${createdAtdates[index]}</p>
                 </div>
             `;
@@ -78,10 +79,11 @@
     };
 
     const fetchDataAndUpdateChart = (queryParams) => {
-        fetch('https://lastfloors-log.onrender.com/log/list/' + (queryParams ? '?' + queryParams : ''))
+        fetch('http://127.0.0.1:8000/log/list/' + (queryParams ? '?' + queryParams : ''))
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                const responseTimes = data.map(log => log.response_time);
                 const paths = data.map(log => log.path);
                 const statusCodes = data.map(log => log.status_code);
                 const createdAtdates = data.map(log => new Date(log.created_at).toLocaleString());
@@ -149,10 +151,10 @@
                     logChart.update();
                 }
 
-                // Pie Chart için status code'ları çizdirme
+               
                 drawOrUpdateStatusCodePieChart(statusCodes);
 
-                // Filtre uygulanmışsa, interval süresini uzat
+                
                 checkFilterAndSetInterval();
             });
     };
