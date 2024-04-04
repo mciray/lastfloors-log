@@ -79,7 +79,7 @@
     };
 
     const fetchDataAndUpdateChart = (queryParams) => {
-        fetch('http://127.0.0.1:8000/log/list/' + (queryParams ? '?' + queryParams : ''))
+        fetch('https://lastfloors-log.onrender.com/log/list/' + (queryParams ? '?' + queryParams : ''))
             .then(response => response.json())
             .then(data => {
                 console.log(data);
