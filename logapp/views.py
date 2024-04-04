@@ -3,6 +3,7 @@ from .serializers import LogEntrySerializer
 from rest_framework import generics
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from rest_framework import status
@@ -11,6 +12,7 @@ from loglama.settings import POST_SECRET
 from django.db.models import Q
 
 class LogEntryListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = LogEntrySerializer
     def get_queryset(self):
         queryset = LogEntry.objects.all()
