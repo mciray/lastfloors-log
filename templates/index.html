@@ -72,7 +72,8 @@
                     <h5 class="card-title text-light">Path: ${log.path}</h5>
                     <p class="card-text text-light">User: ${log.user}</p>
                     <p class="card-text text-light">Status Code: ${log.status_code}</p>
-                    <p class="card-text text-light">Created At: ${createdAtdates[index]}</p>
+                    <p class="card-text text-light">Created At: ${createdAtdates.responseTimes}</p>
+                    <p class="card-text text-light">Response Time: ${log[index]}</p>
                 </div>
             `;
             logInfoDiv.appendChild(cardHtml);
