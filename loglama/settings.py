@@ -25,7 +25,7 @@ import os
 SECRET_KEY = 'django-insecure-ss3ywaqtzt*(ukzlsy4zdo3d_i51=s4*zz%lq@^k*=txm%rh2v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['lastfloors-log.onrender.com','127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
