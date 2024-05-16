@@ -6,6 +6,40 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        h1, h2 {
+            color: #0f0;
+        }
+        .card {
+            background-color: #1a1a1a;
+        }
+        .card-header {
+            background-color: #2a2a2a;
+        }
+        .form-control {
+            background-color: #000;
+            color: #0f0;
+            border-color: #0f0;
+        }
+        .form-label {
+            color: #0f0;
+        }
+        .btn-primary {
+            background-color: #0f0;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #00ff00;
+        }
+        .container {
+            max-width: 1200px;
+        }
+    </style>
 </head>
 <body class="bg-dark text-light">
     <div class="container mt-5 mb-5">
@@ -19,16 +53,14 @@
         </section>
         
         <section>
-            <h2 class="mt-5">Log Information</h2>
-            <div class="row mb-3 justify-content-center">
 
-                <div class="col">
-                    <h1 class="text-center">Log Status Code's</h1>
+            <div class="row mb-3 justify-content-center">
+                <div class="col-md-6">
+                    <h2 class="text-center">Log Status Codes</h2>
                     <canvas id="statusCodePieChart" height="300"></canvas>
                 </div>
-
-                <div class="col m-auto">
-                    <form id="filterForm">
+                <div class="col-md-6">
+                    <form id="filterForm" class="p-3 border rounded" style="background-color: #1a1a1a;">
                         <div class="mb-3">
                             <label for="pathInput" class="form-label">Path:</label>
                             <input type="text" class="form-control" id="pathInput" name="path" placeholder="Enter path">
@@ -46,8 +78,8 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col" id="logInfo">
-                    <div id="logCardsContainer" class="log-cards-container bg-secondary p-3" style="max-height: 500px; overflow-y: auto;">
+                <div class="col">
+                    <div id="logCardsContainer" class="log-cards-container bg-secondary p-3 rounded" style="max-height: 500px; overflow-y: auto;">
                     </div>
                 </div>
             </div>
@@ -65,15 +97,16 @@
         logInfoDiv.innerHTML = '';
         logs.forEach((log, index) => {
             const cardHtml = document.createElement('div');
-            cardHtml.className = `card mb-3 bg-dark border-light text-light`;
+            cardHtml.className = `card mb-3 text-light`;
             cardHtml.innerHTML = `
-                <div class="card-header bg-secondary text-light">${log.method}</div>
+                <div class="card-header">${log.method}</div>
                 <div class="card-body">
-                    <h5 class="card-title text-light">Path: ${log.path}</h5>
-                    <p class="card-text text-light">User: ${log.user}</p>
-                    <p class="card-text text-light">Status Code: ${log.status_code}</p>
-                    <p class="card-text text-light">Created At: ${createdAtdates[index]}</p>
-                    <p class="card-text text-light">Response Time: ${log.response_time}</p>
+                    <h5 class="card-title">Path: ${log.path}</h5>
+                    <p class="card-text">User: ${log.user}</p>
+                    <p class="card-text">Status Code: ${log.status_code}</p>
+                    <p class="card-text">Created At: ${createdAtdates[index]}</p>
+                    <p class="card-text">Response Time: ${log.response_time}</p>
+                    <p class="card-text">IP Address: ${log.ip_address}</p>
                 </div>
             `;
             logInfoDiv.appendChild(cardHtml);
@@ -103,7 +136,7 @@
                                 label: 'Status Codes',
                                 data: statusCodes,
                                 fill: false,
-                                borderColor: colors, // Renklerin atanması
+                                borderColor: colors,
                                 borderWidth: 4,
                                 tension: 0.4,
                                 pointBackgroundColor: colors,
@@ -138,7 +171,7 @@
                                     callbacks: {
                                         afterBody: function(context) {
                                             const index = context[0].dataIndex;
-                                            return 'User: ' + data[index].user + '\nMethod: ' + data[index].method + '\nCreated At: ' + createdAtdates[index];
+                                            return 'User: ' + data[index].user + '\nMethod: ' + data[index].method + '\nCreated At: ' + createdAtdates[index] + '\nIP Address: ' + data[index].ip_address;
                                         }
                                     }
                                 }
@@ -153,10 +186,8 @@
                     logChart.update();
                 }
 
-               
                 drawOrUpdateStatusCodePieChart(statusCodes);
 
-                
                 checkFilterAndSetInterval();
             });
     };
@@ -166,13 +197,11 @@
             statusCodePieChart.destroy();
         }
 
-        // Status kodlarına göre gruplama yapma
         const statusCodeCounts = statusCodes.reduce((acc, code) => {
             acc[code] = (acc[code] || 0) + 1;
             return acc;
         }, {});
 
-        // Chart.js için gerekli veri ve arka plan renklerini hazırlama
         const data = {
             labels: Object.keys(statusCodeCounts),
             datasets: [{
@@ -204,15 +233,15 @@
 
     const getStatusColor = (statusCode) => {
         if (statusCode >= 200 && statusCode < 300) {
-            return 'rgba(75, 192, 192, 1)'; // Yeşil
+            return 'rgba(75, 192, 192, 1)';
         } else if (statusCode >= 300 && statusCode < 400) {
-            return 'rgba(255, 206, 86, 1)'; // Sarı
+            return 'rgba(255, 206, 86, 1)';
         } else if (statusCode >= 400 && statusCode < 500) {
-            return 'rgba(255, 99, 132, 1)'; // Kırmızı
+            return 'rgba(255, 99, 132, 1)';
         } else if (statusCode >= 500) {
-            return 'rgba(153, 102, 255, 1)'; // Mor
+            return 'rgba(153, 102, 255, 1)';
         } else {
-            return 'rgba(169, 169, 169, 1)'; // Gri
+            return 'rgba(169, 169, 169, 1)';
         }
     };
 
@@ -221,7 +250,6 @@
         const method = document.getElementById('methodInput').value;
         const statusCode = document.getElementById('statusCodeInput').value;
 
-        // Filtre uygulanmışsa, interval süresini uzat
         if (path || method || statusCode) {
             clearInterval(intervalID);
             intervalID = setInterval(() => {
@@ -230,7 +258,7 @@
                 if (method) queryParams.append('method', method);
                 if (statusCode) queryParams.append('status_code', statusCode);
                 fetchDataAndUpdateChart(queryParams.toString());
-            }, 20000); // 15 saniyede bir güncelle
+            }, 20000);
         }
     };
 
@@ -240,7 +268,6 @@
         const method = document.getElementById('methodInput').value;
         const statusCode = document.getElementById('statusCodeInput').value;
 
-        // Query param'ları oluştur
         const queryParams = new URLSearchParams();
         if (path) queryParams.append('path', path);
         if (method) queryParams.append('method', method);
@@ -248,15 +275,14 @@
 
         fetchDataAndUpdateChart(queryParams.toString());
 
-
         if (!path && !method && !statusCode) {
             clearInterval(intervalID);
-            intervalID = setInterval(fetchDataAndUpdateChart, 8000); // 8 saniyede bir güncelle
+            intervalID = setInterval(fetchDataAndUpdateChart, 8000);
         }
     });
 
     fetchDataAndUpdateChart();
-    intervalID = setInterval(fetchDataAndUpdateChart, 8000); // 8 saniyede bir güncelle
+    intervalID = setInterval(fetchDataAndUpdateChart, 8000);
 </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
