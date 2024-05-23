@@ -95,11 +95,11 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DATABASE'), 
-        'USER': os.getenv('POSTGRES_USER'),  
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),  
-        'HOST': os.getenv('POSTGRES_HOST'),  
-        'PORT': 5432,  
+        'NAME': 'log_2',
+        'USER': 'melih',
+        'PASSWORD': '3R3UxBJMTk2AgCS4sAzfeXJCzfm96kYn',
+        'HOST': 'dpg-cp7nf4jtg9os73ad7gh0-a',
+        'PORT': '5432',
     }
 }
 POST_SECRET=os.getenv('POST_SECRET')
