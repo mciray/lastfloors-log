@@ -73,8 +73,21 @@
                             <label for="statusCodeInput" class="form-label">Status Code:</label>
                             <input type="number" class="form-control" id="statusCodeInput" name="status_code" placeholder="Enter status code">
                         </div>
+                        <div class="mb-3">
+                            <label for="startDateInput" class="form-label">Start Date:</label>
+                            <input type="date" class="form-control" id="startDateInput" name="start_date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="endDateInput" class="form-label">End Date:</label>
+                            <input type="date" class="form-control" id="endDateInput" name="end_date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="userInput" class="form-label">User:</label>
+                            <input type="text" class="form-control" id="userInput" name="user" placeholder="Enter user">
+                        </div>
                         <button type="submit" class="btn btn-primary w-100">Filter</button>
                     </form>
+                    
                 </div>
             </div>
             <div class="row">
@@ -114,7 +127,7 @@
     };
 
     const fetchDataAndUpdateChart = (queryParams) => {
-        fetch('https://lastfloors-log.onrender.com/log/list/' + (queryParams ? '?' + queryParams : ''))
+        fetch('https://loglastfloors.pythonanywhere.com/log/list/' + (queryParams ? '?' + queryParams : ''))
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -246,43 +259,56 @@
     };
 
     const checkFilterAndSetInterval = () => {
-        const path = document.getElementById('pathInput').value;
-        const method = document.getElementById('methodInput').value;
-        const statusCode = document.getElementById('statusCodeInput').value;
+    const path = document.getElementById('pathInput').value;
+    const method = document.getElementById('methodInput').value;
+    const statusCode = document.getElementById('statusCodeInput').value;
+    const startDate = document.getElementById('startDateInput').value;
+    const endDate = document.getElementById('endDateInput').value;
+    const user = document.getElementById('userInput').value;
 
-        if (path || method || statusCode) {
-            clearInterval(intervalID);
-            intervalID = setInterval(() => {
-                const queryParams = new URLSearchParams();
-                if (path) queryParams.append('path', path);
-                if (method) queryParams.append('method', method);
-                if (statusCode) queryParams.append('status_code', statusCode);
-                fetchDataAndUpdateChart(queryParams.toString());
-            }, 20000);
-        }
-    };
+    if (path || method || statusCode || startDate || endDate || user) {
+        clearInterval(intervalID);
+        intervalID = setInterval(() => {
+            const queryParams = new URLSearchParams();
+            if (path) queryParams.append('path', path);
+            if (method) queryParams.append('method', method);
+            if (statusCode) queryParams.append('status_code', statusCode);
+            if (startDate) queryParams.append('start_date', startDate);
+            if (endDate) queryParams.append('end_date', endDate);
+            if (user) queryParams.append('user', user);
+            fetchDataAndUpdateChart(queryParams.toString());
+        }, 20000);
+    }
+};
 
-    document.getElementById('filterForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const path = document.getElementById('pathInput').value;
-        const method = document.getElementById('methodInput').value;
-        const statusCode = document.getElementById('statusCodeInput').value;
+document.getElementById('filterForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const path = document.getElementById('pathInput').value;
+    const method = document.getElementById('methodInput').value;
+    const statusCode = document.getElementById('statusCodeInput').value;
+    const startDate = document.getElementById('startDateInput').value;
+    const endDate = document.getElementById('endDateInput').value;
+    const user = document.getElementById('userInput').value;
 
-        const queryParams = new URLSearchParams();
-        if (path) queryParams.append('path', path);
-        if (method) queryParams.append('method', method);
-        if (statusCode) queryParams.append('status_code', statusCode);
+    const queryParams = new URLSearchParams();
+    if (path) queryParams.append('path', path);
+    if (method) queryParams.append('method', method);
+    if (statusCode) queryParams.append('status_code', statusCode);
+    if (startDate) queryParams.append('start_date', startDate);
+    if (endDate) queryParams.append('end_date', endDate);
+    if (user) queryParams.append('user', user);
 
-        fetchDataAndUpdateChart(queryParams.toString());
+    fetchDataAndUpdateChart(queryParams.toString());
 
-        if (!path && !method && !statusCode) {
-            clearInterval(intervalID);
-            intervalID = setInterval(fetchDataAndUpdateChart, 8000);
-        }
-    });
+    if (!path && !method && !statusCode && !startDate && !endDate && !user) {
+        clearInterval(intervalID);
+        intervalID = setInterval(fetchDataAndUpdateChart, 8000);
+    }
+});
 
-    fetchDataAndUpdateChart();
-    intervalID = setInterval(fetchDataAndUpdateChart, 8000);
+fetchDataAndUpdateChart();
+intervalID = setInterval(fetchDataAndUpdateChart, 8000);
+
 </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

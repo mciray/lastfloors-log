@@ -14,6 +14,7 @@ from django.db.models import Q
 class LogEntryListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = LogEntrySerializer
+
     def get_queryset(self):
         queryset = LogEntry.objects.all()
 
@@ -21,9 +22,12 @@ class LogEntryListView(generics.ListAPIView):
         path = self.request.query_params.get('path', None)
         method = self.request.query_params.get('method', None)
         status_code = self.request.query_params.get('status_code', None)
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+        user = self.request.query_params.get('user', None)
 
         # Eğer en az bir filtreleme seçeneği belirtilmişse, bütün modelde arama yap
-        if path or method or status_code:
+        if path or method or status_code or start_date or end_date or user:
             filter_conditions = Q()
             if path:
                 filter_conditions &= Q(path__icontains=path)
@@ -31,8 +35,15 @@ class LogEntryListView(generics.ListAPIView):
                 filter_conditions &= Q(method__icontains=method)
             if status_code:
                 filter_conditions &= Q(status_code=status_code)
+            if start_date:
+                filter_conditions &= Q(created_at__gte=start_date)
+            if end_date:
+                filter_conditions &= Q(created_at__lte=end_date)
+            if user:
+                filter_conditions &= Q(user__icontains=user)
             queryset = queryset.filter(filter_conditions)
         else:
+            # Hiçbir filtreleme yapılmadığında son 50 kayıt getirilsin
             last_entries = list(reversed(queryset.order_by('-created_at')[:50]))
             return last_entries
 
